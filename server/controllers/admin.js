@@ -91,7 +91,7 @@ export const deleteCourse = TryCatch(async (req, res) => {
   res.json({ message: "Course Deleted" });
 });
 
-export const getAllStats = TryCatch(async (req, res) =>{
+export const getAllStats = TryCatch(async (req, res) => {
   const totalCourses = (await Courses.find()).length;
   const totalLectures = (await Lecture.find()).length;
   const totalUsers = (await User.find()).length;
@@ -99,11 +99,42 @@ export const getAllStats = TryCatch(async (req, res) =>{
   const stats = {
     totalCourses,
     totalLectures,
-    totalUsers
+    totalUsers,
   };
 
   res.json({
-    stats
-  }) 
+    stats,
+  });
+});
 
-})
+export const getAllUser = TryCatch(async (req, res) => {
+  const users = await User.find({ _id: { $ne: req.user._id } }).select(
+    "-password"
+  );
+
+  res.json({
+    users,});
+});
+
+export const updateRole = TryCatch(async (req, res) => {
+  const user = await User.findById(req.params.id);
+
+  if (user.role === "user") {
+    user.role = "admin";
+    await user.save();
+
+    return res.status(200).json({
+      message: "User Role Updated to Admin",
+    });
+  }
+
+  if (user.role === "admin") {
+    user.role = "user";
+    await user.save();
+
+    return res.status(200).json({
+      message: "Role Updated",
+    });
+  }
+});
+
